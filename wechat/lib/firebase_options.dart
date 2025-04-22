@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'wechat-69ab8.firebasestorage.app',
     measurementId: 'G-1WLN9H3S95',
   );
+
 }
