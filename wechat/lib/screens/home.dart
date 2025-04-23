@@ -11,6 +11,12 @@ class Myhomepage extends StatefulWidget {
 class _MyhomepageState extends State<Myhomepage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Placeholder(
+      color: Colors.red,
+      strokeWidth: 2,
+      fallbackHeight: 100,
+      fallbackWidth: 100,
+      
+    );
   }
 }

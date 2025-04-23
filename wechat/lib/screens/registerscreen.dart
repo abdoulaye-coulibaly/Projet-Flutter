@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// TODO: add flutter_svg package
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wechat/screens/loginscreen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -41,7 +40,6 @@ class ComplateProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-
                   const Text(
                     "Complete your details or continue \nwith social media",
                     textAlign: TextAlign.center,
@@ -50,14 +48,6 @@ class ComplateProfileScreen extends StatelessWidget {
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                   const Registerform(),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-
-                  const SizedBox(height: 16),
-                  const Text(
-                    "By continuing your confirm that you agree \nwith our Term and Condition",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF757575)),
-                  ),
-
                   const SizedBox(height: 16),
                 ],
               ),
@@ -66,28 +56,80 @@ class ComplateProfileScreen extends StatelessWidget {
         ),
       ),
     );
-    
   }
 }
-
 
 const authOutlineInputBorder = OutlineInputBorder(
   borderSide: BorderSide(color: Color(0xFF757575)),
   borderRadius: BorderRadius.all(Radius.circular(100)),
 );
 
-class ComplateProfileForm extends StatelessWidget {
-  const ComplateProfileForm({super.key});
+class Registerform extends StatefulWidget {
+  const Registerform({super.key});
+
+  @override
+  State<Registerform> createState() => _RegisterformState();
+}
+
+class _RegisterformState extends State<Registerform> {
+  final emailField = TextEditingController();
+  final passwordField = TextEditingController();
+  final confirmPasswordField = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+
+  String _getMessageFromErrorCode(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        return 'Cette adresse email est déjà utilisée par un autre compte.';
+      case 'invalid-email':
+        return 'L\'adresse email est invalide.';
+      case 'operation-not-allowed':
+        return 'L\'opération n\'est pas autorisée.';
+      case 'weak-password':
+        return 'Le mot de passe est trop faible.';
+      default:
+        return 'Une erreur s\'est produite. Veuillez réessayer.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
+          if (_errorMessage != null)
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+
           TextFormField(
-            onSaved: (email) {},
-            onChanged: (email) {},
+            controller: emailField,
+            keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer votre email';
+              }
+              if (!emailRegex.hasMatch(value)) {
+                return 'Veuillez entrer une adresse email valide';
+              }
+              return null;
+            },
             decoration: InputDecoration(
               hintText: "Enter your email",
               labelText: "Email",
@@ -103,16 +145,30 @@ class ComplateProfileForm extends StatelessWidget {
               focusedBorder: authOutlineInputBorder.copyWith(
                 borderSide: const BorderSide(color: Color(0xFFFF7643)),
               ),
+              errorBorder: authOutlineInputBorder.copyWith(
+                borderSide: const BorderSide(color: Colors.red),
+              ),
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: TextFormField(
-              onSaved: (password) {},
-              onChanged: (password) {},
+              controller: passwordField,
+              obscureText: true,
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer un mot de passe';
+                }
+                if (value.length < 6) {
+                  return 'Le mot de passe doit contenir au moins 6 caractères';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 hintText: "Password",
-                labelText: "password",
+                labelText: "Password",
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 hintStyle: const TextStyle(color: Color(0xFF757575)),
                 contentPadding: const EdgeInsets.symmetric(
@@ -125,14 +181,27 @@ class ComplateProfileForm extends StatelessWidget {
                 focusedBorder: authOutlineInputBorder.copyWith(
                   borderSide: const BorderSide(color: Color(0xFFFF7643)),
                 ),
+                errorBorder: authOutlineInputBorder.copyWith(
+                  borderSide: const BorderSide(color: Colors.red),
+                ),
               ),
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 0),
             child: TextFormField(
-              onSaved: (address) {},
-              onChanged: (address) {},
+              controller: confirmPasswordField,
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez confirmer votre mot de passe';
+                }
+                if (value != passwordField.text) {
+                  return 'Les mots de passe ne correspondent pas';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 hintText: "Password Confirmation",
                 labelText: "Password Confirmation",
@@ -148,29 +217,63 @@ class ComplateProfileForm extends StatelessWidget {
                 focusedBorder: authOutlineInputBorder.copyWith(
                   borderSide: const BorderSide(color: Color(0xFFFF7643)),
                 ),
+                errorBorder: authOutlineInputBorder.copyWith(
+                  borderSide: const BorderSide(color: Colors.red),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Color.fromARGB(255, 67, 70, 255),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+          const SizedBox(height: 24),
+
+          _isLoading
+              ? const CircularProgressIndicator(
+                color: Color.fromARGB(255, 67, 70, 255),
+              )
+              : ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      _isLoading = true;
+                      _errorMessage = null;
+                    });
+
+                    try {
+                      await Auth().registerWithEmailAndPassword(
+                        emailField.text.trim(),
+                        passwordField.text.trim(),
+                      );
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      setState(() {
+                        _errorMessage = _getMessageFromErrorCode(e);
+                        _isLoading = false;
+                      });
+                    } catch (e) {
+                      setState(() {
+                        _errorMessage = 'Une erreur inattendue s\'est produite';
+                        _isLoading = false;
+                      });
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: Color.fromARGB(255, 67, 70, 255),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                  ),
+                ),
+                child: const Text("Register"),
               ),
-            ),
-            child: const Text("Register"),
-          ),
+
           const SizedBox(height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -194,7 +297,10 @@ class ComplateProfileForm extends StatelessWidget {
             children: [
               const Spacer(),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                Auth().signInWithGoogle();
+
+                },
                 icon: const FaIcon(
                   FontAwesomeIcons.google,
                   color: Color.fromARGB(255, 67, 70, 255),
@@ -208,151 +314,31 @@ class ComplateProfileForm extends StatelessWidget {
                   color: Color.fromARGB(255, 67, 70, 255),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {},
-                icon: const FaIcon(FontAwesomeIcons.apple),
-              ),
+             
               const Spacer(),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class Registerform extends StatefulWidget {
-  const Registerform({super.key});
-
-  @override
-  State<Registerform> createState() => _RegisterformState();
-}
-
-class _RegisterformState extends State<Registerform> {
-  final  emailField = TextEditingController();
-  final  passwordField = TextEditingController();
-  
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: emailField,
-            onSaved: (email) {},
-            onChanged: (email) {},
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-              hintText: "Enter your email",
-              labelText: "Email",
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              hintStyle: const TextStyle(color: Color(0xFF757575)),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
-              suffix: SvgPicture.string(userIcon),
-              border: authOutlineInputBorder,
-              enabledBorder: authOutlineInputBorder,
-              focusedBorder: authOutlineInputBorder.copyWith(
-                borderSide: const BorderSide(color: Color(0xFFFF7643)),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              controller: passwordField,
-              onSaved: (password) {},
-              onChanged: (password) {},
-              decoration: InputDecoration(
-                hintText: "Password",
-                labelText: "password",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(phoneIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                  borderSide: const BorderSide(color: Color(0xFFFF7643)),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0),
-            child: TextFormField(
-              onSaved: (address) {},
-              onChanged: (address) {},
-              decoration: InputDecoration(
-                hintText: "Password Confirmation",
-                labelText: "Password Confirmation",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(locationPointIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                  borderSide: const BorderSide(color: Color(0xFFFF7643)),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () async {
-            
-                   try {
-                     await Auth().registerWithEmailAndPassword(
-                       emailField.text.trim(),
-                       passwordField.text.trim(),
-                     );
-                     Navigator.pushAndRemoveUntil(
-                       context,
-                       MaterialPageRoute(
-                         builder: (context) => const LoginScreen(),
-                       ),
-                       (route) => false,
-                     );
-                   } on FirebaseAuthException catch (e) {
-                     print(e);
-                   }
-                    
-                
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Color.fromARGB(255, 67, 70, 255),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-              ),
-            ),
-            child: const Text("Register"),
-          ),
-          const SizedBox(height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("or", style: TextStyle(color: Color(0xFF757575))),
+              const Text(
+                "Already have an account?",
+                style: TextStyle(color: Color(0xFF757575)),
+              ),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: () {
-
-                  
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
                 },
                 child: const Text(
-                  "Continue with social media",
+                  "Login",
                   style: TextStyle(
                     color: Color.fromARGB(255, 67, 70, 255),
                     fontWeight: FontWeight.bold,
@@ -361,65 +347,8 @@ class _RegisterformState extends State<Registerform> {
               ),
             ],
           ),
-
-          Row(
-            children: [
-              const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: const FaIcon(
-                  FontAwesomeIcons.google,
-                  color: Color.fromARGB(255, 67, 70, 255),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {},
-                icon: const FaIcon(
-                  FontAwesomeIcons.facebook,
-                  color: Color.fromARGB(255, 67, 70, 255),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {},
-                icon: const FaIcon(FontAwesomeIcons.apple),
-              ),
-              const Spacer(),
-            ],
-          ),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Already have an account?",
-                        style: TextStyle(color: Color(0xFF757575)),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 67, 70, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
         ],
       ),
-      
     );
   }
 }
