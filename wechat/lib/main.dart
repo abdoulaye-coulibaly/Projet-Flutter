@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wechat/firebase_options.dart';  
 import 'package:firebase_core/firebase_core.dart';
-import 'package:wechat/screens/splashscreen.dart';  
+import 'package:wechat/screens/redirectpage.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SplashScreen(),
+      home: Redirectpage(),
     );
   }
 }

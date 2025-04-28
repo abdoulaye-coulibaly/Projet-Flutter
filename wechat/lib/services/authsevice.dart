@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
+// import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class Auth {
+class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  User? get currentUser => _firebaseAuth.currentUser;
+  User? getcurrentUser() => _firebaseAuth.currentUser;
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
@@ -21,6 +22,7 @@ class Auth {
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
+      
     } on FirebaseAuthException catch (e) {
       throw e;
     }
@@ -31,33 +33,48 @@ class Auth {
     String password,
   ) async {
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
+      await   _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      String uid = _firebaseAuth.currentUser!.uid;
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'email': email,
+        'uid': uid,
+        'createdAt': DateTime.now(),
+        'updatedAt': DateTime.now(),
+      });
     } on FirebaseAuthException catch (e) {
       throw e;
     }
   }
 
  
-  Future<void> signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+  Future<dynamic> signInWithGoogle() async {
 
     try {
-       final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
-      if(googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
+       final GoogleSignIn googleSignIn = GoogleSignIn();
+       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+        final GoogleSignInAuthentication? googlAuth =
+            await googleUser?.authentication;
+
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googlAuth?.accessToken,
+          idToken: googlAuth?.idToken,
         );
-        // Once signed in, return the UserCredential
-       await _firebaseAuth.signInWithCredential(credential);
+        
+      return await _firebaseAuth.signInWithCredential(credential);
+        // String uid = _firebaseAuth.currentUser!.uid;
+        // await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        //   'email': googleSignInAccount?.email,
+        //   'uid': uid,
+        //   'createdAt': DateTime.now(),
+        //   'updatedAt': DateTime.now(),
+        // });
        
-      }
+      
     } catch (e) {
 
        throw e;

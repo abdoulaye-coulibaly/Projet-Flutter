@@ -1,5 +1,8 @@
-
 import 'package:flutter/material.dart';
+import 'package:wechat/screens/loginscreen.dart';
+import 'package:wechat/screens/userspage.dart';
+import 'package:wechat/services/%20chatservice.dart';
+import 'package:wechat/services/authsevice.dart';
 
 class Myhomepage extends StatefulWidget {
   const Myhomepage({super.key});
@@ -9,14 +12,51 @@ class Myhomepage extends StatefulWidget {
 }
 
 class _MyhomepageState extends State<Myhomepage> {
+  final Chatservice _chatservice = Chatservice();
+  final AuthService _authService = AuthService();
   @override
-  Widget build(BuildContext context) {
-    return const Placeholder(
-      color: Colors.red,
-      strokeWidth: 2,
-      fallbackHeight: 100,
-      fallbackWidth: 100,
-      
-    );
-  }
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Color.fromARGB(255, 67, 70, 255),
+      title: const Text(
+          "We.Chat",
+          style: TextStyle(
+            color: Color.fromARGB(255, 255, 255, 255),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            await _authService.signOut();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          },
+        ),
+      ],
+    ),
+    
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+       Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Userspage(),
+          ),
+        );
+      },
+      backgroundColor: Color.fromARGB(255, 67, 70, 255),
+      child: const Icon(Icons.chat, color: Colors.white),
+    ),
+  );
+}
+
+
 }
