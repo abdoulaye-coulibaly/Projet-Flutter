@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wechat/screens/loginscreen.dart';
 import 'package:wechat/screens/userspage.dart';
 import 'package:wechat/services/%20chatservice.dart';
 import 'package:wechat/services/authsevice.dart';
@@ -31,13 +30,9 @@ Widget build(BuildContext context) {
       actions: [
         IconButton(
           icon: const Icon(Icons.logout),
-          onPressed: () async {
-            await _authService.signOut();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (route) => false,
-            );
+          onPressed: (){
+              _authService.deconnexion(context);
+           
           },
         ),
       ],

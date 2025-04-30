@@ -284,7 +284,7 @@ class _LoginFormState extends State<LoginForm> {
               const Spacer(),
               IconButton(
                 onPressed: () {
-                  AuthService().signInWithGoogle();
+                  AuthService().signInWithGoogle(context);
                 },
                 icon: const FaIcon(
                   FontAwesomeIcons.google,

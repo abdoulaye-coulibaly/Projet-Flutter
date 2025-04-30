@@ -324,7 +324,7 @@ class _RegisterformState extends State<Registerform> {
               const Spacer(),
               IconButton(
                 onPressed: () {
-                AuthService().signInWithGoogle();
+                AuthService().signInWithGoogle(context);
 
                 },
                 icon: const FaIcon(
