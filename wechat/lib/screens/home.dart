@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wechat/screens/profil.dart';
 import 'package:wechat/screens/userspage.dart';
 import 'package:wechat/services/%20chatservice.dart';
 import 'package:wechat/services/authsevice.dart';
@@ -33,6 +34,17 @@ Widget build(BuildContext context) {
           onPressed: (){
               _authService.deconnexion(context);
            
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.person),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Profilpage(),
+              ),
+            );
           },
         ),
       ],

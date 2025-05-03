@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:wechat/services/authsevice.dart';
 
 class Profilpage extends StatelessWidget {
   const Profilpage({super.key});
@@ -20,7 +21,12 @@ class Profilpage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profil"),
+        backgroundColor: Color.fromARGB(255, 67, 70, 255),
+        title: const Text("Profil", style: TextStyle(
+            color: Color.fromARGB(255, 255, 255, 255),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),),
         centerTitle: true,
       ),
       body: Center(
@@ -33,8 +39,10 @@ class Profilpage extends StatelessWidget {
                   "https://i.postimg.cc/mhhVywp9/splash-1.png"),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Username",
+             Text(
+             currentUser!.email ?? "User Name",
+
+              
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -45,7 +53,7 @@ class Profilpage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Add your logout logic here
+                AuthService().deconnexion(context);
               },
               child: const Text("Logout"),
             ),
